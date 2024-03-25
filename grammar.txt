@@ -1,0 +1,155 @@
+# LL1 (except for dangling else) grammar for Mila Compiler
+# Non-terminals = CamelCase
+# Terminals (= tokens) = <UPPER_CASE> (names are from TokenType enum)
+
+
+
+Program -> <PROGRAM> <IDENTIFIER> <SEMICOLON> Block <DOT>
+
+Block -> BlockDecl CompoundStatement
+BlockDecl -> ConstantDefinitionList BlockDecl
+BlockDecl -> VariableDeclarationList BlockDecl
+BlockDecl -> ProcedureDeclaration BlockDecl
+BlockDecl -> FunctionDeclaration BlockDecl
+BlockDecl ->
+
+UnsignedNumber -> <INTEGER_LITERAL>
+UnsignedNumber -> <REAL_LITERAL>
+
+Type -> PrimitiveType
+Type -> ArrayType
+
+PrimitiveType -> <INTEGER>
+PrimitiveType -> <REAL>
+
+ArrayType -> <ARRAY> <LEFT_BRACKET> SignedInteger <DOUBLE_DOT> SignedInteger <RIGHT_BRACKET> <OF> PrimitiveType
+SignedInteger -> <MINUS> <INTEGER_LITERAL>
+SignedInteger -> <INTEGER_LITERAL>
+
+ConstantDefinitionList -> <CONST> ConstantDefinition ConstantDefinitionListR
+ConstantDefinitionListR -> ConstantDefinition ConstantDefinitionListR
+ConstantDefinitionListR ->
+ConstantDefinition -> <IDENTIFIER> <EQUAL> Expression <SEMICOLON>
+
+VariableDeclarationList -> <VAR> VariableDeclarationGroup VariableDeclarationListR
+VariableDeclarationListR -> VariableDeclarationGroup VariableDeclarationListR
+VariableDeclarationListR ->
+VariableDeclarationGroup -> IdentifierList <COLON> Type <SEMICOLON>
+
+IdentifierList -> <IDENTIFIER> IdentifierListR
+IdentifierListR -> <COMMA> <IDENTIFIER> IdentifierListR
+IdentifierListR ->
+
+ProcedureDeclaration -> <PROCEDURE> <IDENTIFIER> FunctionParameters <SEMICOLON> BodyOrForward <SEMICOLON>
+FunctionDeclaration -> <FUNCTION> <IDENTIFIER> FunctionParameters <COLON> PrimitiveType <SEMICOLON> BodyOrForward <SEMICOLON>
+
+FunctionParameters -> <LEFT_PAREN> FormalParameterList <RIGHT_PAREN>
+
+FormalParameterList -> ParameterGroup FormalParameterListR
+FormalParameterList ->
+FormalParameterListR -> <SEMICOLON> ParameterGroup FormalParameterListR
+FormalParameterListR ->
+ParameterGroup -> IdentifierList <COLON> PrimitiveType
+
+BodyOrForward -> <FORWARD>
+BodyOrForward -> Body
+
+Body -> BodyDecl CompoundStatement
+BodyDecl -> ConstantDefinitionList BodyDecl
+BodyDecl -> VariableDeclarationList BodyDecl
+BodyDecl ->
+
+Statement -> SimpleStatement
+Statement -> ComplexStatement
+
+SimpleStatement -> EmptyStatement
+SimpleStatement -> <EXIT>
+SimpleStatement -> <BREAK>
+SimpleStatement -> <IDENTIFIER> SimpleStatementIdentifierContinuation
+SimpleStatementIdentifierContinuation -> FunctionArgs
+SimpleStatementIdentifierContinuation -> OptionalArrayAccess <ASSIGN> Expression
+OptionalArrayAccess -> ArrayAccess
+OptionalArrayAccess ->
+ArrayAccess -> <LEFT_BRACKET> Expression <RIGHT_BRACKET>
+EmptyStatement ->
+
+ComplexStatement -> CompoundStatement
+ComplexStatement -> IfStatement
+ComplexStatement -> WhileStatement
+ComplexStatement -> ForStatement
+
+CompoundStatement -> <BEGIN> Statement CompoundStatementR <END>
+CompoundStatementR -> <SEMICOLON> Statement CompoundStatementR
+CompoundStatementR ->
+
+IfStatement -> <IF> Expression <THEN> Statement ElseStatement
+ElseStatement -> <ELSE> Statement
+ElseStatement ->
+
+WhileStatement -> <WHILE> Expression <DO> Statement
+ForStatement -> <FOR> <IDENTIFIER> <ASSIGN> Expression To Expression <DO> Statement
+
+To -> <TO>
+To -> <DOWNTO>
+
+Expression -> LogicalOrExpression
+
+LogicalOrExpression -> LogicalAndExpression LogicalOrExpressionR
+LogicalOrExpressionR -> <OR> LogicalAndExpression LogicalOrExpressionR
+LogicalOrExpressionR ->
+
+LogicalAndExpression -> EqualityExpression LogicalAndExpressionR
+LogicalAndExpressionR -> <AND> EqualityExpression LogicalAndExpressionR
+LogicalAndExpressionR ->
+
+EqualityExpression -> RelationalExpression EqualityExpressionR
+EqualityExpressionR -> EqualityOperator RelationalExpression EqualityExpressionR
+EqualityExpressionR ->
+
+EqualityOperator -> <EQUAL>
+EqualityOperator -> <NOT_EQUAL>
+
+RelationalExpression -> AdditiveExpression RelationalExpressionR
+RelationalExpressionR -> RelationalOperator AdditiveExpression RelationalExpressionR
+RelationalExpressionR ->
+
+RelationalOperator -> <LESS>
+RelationalOperator -> <LESS_EQUAL>
+RelationalOperator -> <GREATER>
+RelationalOperator -> <GREATER_EQUAL>
+
+AdditiveExpression -> MultiplicativeExpression AdditiveExpressionR
+AdditiveExpressionR -> AdditiveOperator MultiplicativeExpression AdditiveExpressionR
+AdditiveExpressionR ->
+
+AdditiveOperator -> <PLUS>
+AdditiveOperator -> <MINUS>
+
+MultiplicativeExpression -> UnaryExpression MultiplicativeExpressionR
+MultiplicativeExpressionR -> MultiplicativeOperator UnaryExpression MultiplicativeExpressionR
+MultiplicativeExpressionR ->
+
+MultiplicativeOperator -> <MULTIPLY>
+MultiplicativeOperator -> <DIVIDE>
+MultiplicativeOperator -> <MOD>
+MultiplicativeOperator -> <DIV>
+
+UnaryExpression -> UnaryOperator UnaryExpression
+UnaryExpression -> PrimaryExpression
+
+UnaryOperator -> <MINUS>
+UnaryOperator -> <NOT>
+
+PrimaryExpression -> <IDENTIFIER> PrimaryExpressionIdentifierContinuation
+PrimaryExpression -> <LEFT_PAREN> Expression <RIGHT_PAREN>
+PrimaryExpression -> UnsignedNumber
+PrimaryExpressionIdentifierContinuation -> FunctionArgs
+PrimaryExpressionIdentifierContinuation -> ArrayAccess
+PrimaryExpressionIdentifierContinuation ->
+
+FunctionArgs -> <LEFT_PAREN> ArgumentList <RIGHT_PAREN>
+
+ArgumentList -> Expression ArgumentListR
+ArgumentList ->
+ArgumentListR -> <COMMA> Expression ArgumentListR
+ArgumentListR ->
