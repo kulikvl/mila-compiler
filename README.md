@@ -1,5 +1,9 @@
 # Mila compiler
 
+## Overview
+
+This is the compiler for the Mila programming language, which closely resembles Pascal. It leverages the LLVM infrastructure. A comprehensive suite of unit and system tests has been developed using the Google Test library.
+
 ## Building
 
 Install dependencies:
@@ -26,6 +30,8 @@ Help:
 ```bash
 ./milac --help
 ```
+
+You can also use Dockerfile if you don't want to build and run compiler on your local machine.
 
 # Mila programming language specification
 
